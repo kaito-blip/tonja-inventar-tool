@@ -29,11 +29,15 @@ SUPABASE_KEY = os.environ.get('SUPABASE_SERVICE_KEY', '')
 ACCESS_CODE = os.environ.get('INVENTAR_CODE', 'tonja-inventar')
 
 TABLE = 'inventar_items'
+LS_TABLE = 'inventar_lieferscheine'
 KATEGORIEN = ('Damen', 'Accessoires', 'ARCHIVES', 'Sonstiges')
 STANDORTE = ('Basel', 'Basel ARCHIVES', 'Gstaad', 'Genf', 'Lager')
 UUID_RE = re.compile(
     r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
 MAX_BESTAND = 100000
+MAX_FOTOS = 3
+# DataURL-Länge: ~400 KB Bilddaten + Base64-Overhead (+33 %) + Header.
+MAX_FOTO_CHARS = 600_000
 
 _ssl_ctx = ssl.create_default_context()
 
@@ -94,6 +98,12 @@ def _int(value, lo, hi):
     return i
 
 
+def _valid_foto(foto):
+    """Client-seitig verkleinertes Foto als data:image-URL, max. ~400 KB."""
+    return (isinstance(foto, str) and foto.startswith('data:image/')
+            and len(foto) <= MAX_FOTO_CHARS)
+
+
 def _validate(b, partial=False):
     """Validate item fields from a request body.
 
@@ -136,6 +146,13 @@ def _validate(b, partial=False):
         if len(notiz) > 300:
             return None, 'Notiz zu lang (max. 300 Zeichen)'
         fields['notiz'] = notiz
+    if 'fotos' in b:
+        fotos = b.get('fotos')
+        if (not isinstance(fotos, list) or len(fotos) > MAX_FOTOS
+                or any(not _valid_foto(f) for f in fotos)):
+            return None, (f'Ungültige Fotos (max. {MAX_FOTOS}, '
+                          'je max. ~400 KB)')
+        fields['fotos'] = fotos
     return fields, None
 
 
@@ -216,4 +233,58 @@ def handle_delete(handler, match, body):
         return 503, {'error': str(e)}
     if not rows:
         return 404, {'error': 'Artikel nicht gefunden'}
+    return 200, {'ok': True}
+
+
+# ------------------------------------------------------------------
+# Lieferscheine & Boxen (abfotografierte Lieferscheine)
+# ------------------------------------------------------------------
+
+MISSING_LS_TABLE_MSG = 'Tabelle inventar_lieferscheine fehlt — Migration ausführen'
+
+
+def handle_ls_list(handler, match, body):
+    """GET /api/inventar/lieferscheine -> {lieferscheine}."""
+    if not _authed(handler):
+        return 401, {'error': 'Ungültiger Zugangscode'}
+    try:
+        rows = _db('GET', f'{LS_TABLE}?select=*&order=created_at.desc')
+    except MissingTableError:
+        return 503, {'error': MISSING_LS_TABLE_MSG}
+    return 200, {'lieferscheine': rows}
+
+
+def handle_ls_create(handler, match, body):
+    """POST /api/inventar/lieferscheine {titel?, foto} — Aufnahme speichern."""
+    if not _authed(handler):
+        return 401, {'error': 'Ungültiger Zugangscode'}
+    b = body or {}
+    titel = str(b.get('titel', '')).strip()
+    if len(titel) > 120:
+        return 400, {'error': 'Titel zu lang (max. 120 Zeichen)'}
+    foto = b.get('foto')
+    if not _valid_foto(foto):
+        return 400, {'error': 'Ungültiges Foto (data:image, max. ~400 KB)'}
+    try:
+        rows = _db('POST', LS_TABLE, body={'titel': titel, 'foto': foto})
+    except MissingTableError:
+        return 503, {'error': MISSING_LS_TABLE_MSG}
+    return 200, {'ok': True,
+                 'lieferschein': rows[0] if rows else {'titel': titel,
+                                                       'foto': foto}}
+
+
+def handle_ls_delete(handler, match, body):
+    """DELETE /api/inventar/lieferscheine/<id> — Aufnahme löschen."""
+    if not _authed(handler):
+        return 401, {'error': 'Ungültiger Zugangscode'}
+    ls_id = match.group(1).lower()
+    if not UUID_RE.match(ls_id):
+        return 400, {'error': 'Ungültige Lieferschein-ID'}
+    try:
+        rows = _db('DELETE', f'{LS_TABLE}?id=eq.{ls_id}')
+    except MissingTableError:
+        return 503, {'error': MISSING_LS_TABLE_MSG}
+    if not rows:
+        return 404, {'error': 'Lieferschein nicht gefunden'}
     return 200, {'ok': True}

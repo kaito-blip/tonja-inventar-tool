@@ -179,12 +179,12 @@
   }
 
   /* ---------- Sheet ---------- */
-  #sheetOverlay{
+  #sheetOverlay,#lsOverlay{
     display:none; position:fixed; inset:0; z-index:100;
     background:rgba(0,0,0,.35); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
     align-items:flex-end; justify-content:center;
   }
-  #sheetOverlay.open{display:flex}
+  #sheetOverlay.open,#lsOverlay.open{display:flex}
   .sheet{
     background:var(--bg); width:100%; max-height:92vh; overflow-y:auto;
     border-radius:20px 20px 0 0; padding:10px 20px calc(24px + env(safe-area-inset-bottom));
@@ -235,6 +235,107 @@
   }
   .btn-danger.armed{background:var(--red); color:#fff; box-shadow:none}
   #sheetMsg{color:var(--red); font-size:13px; margin-top:12px; text-align:center; min-height:16px}
+  .btn-mail{
+    width:100%; height:48px; margin-top:10px; border-radius:12px;
+    background:var(--card); color:var(--accent); font-size:16px; font-weight:600;
+    box-shadow:0 0 0 .5px var(--hairline);
+    display:none; align-items:center; justify-content:center; gap:8px;
+  }
+  .btn-mail.show{display:flex}
+  .btn-mail:active{opacity:.7}
+
+  /* ---------- Fotos ---------- */
+  .foto-row{display:flex; gap:12px; flex-wrap:wrap; padding-top:8px}
+  .foto-thumb{position:relative; width:56px; height:56px}
+  .foto-thumb img{
+    width:56px; height:56px; border-radius:12px; object-fit:cover; display:block;
+    cursor:pointer; box-shadow:0 0 0 .5px var(--hairline); background:#e9e9eb;
+  }
+  .foto-x{
+    position:absolute; top:-7px; right:-7px; width:22px; height:22px; border-radius:50%;
+    background:#1d1d1f; color:#fff; font-size:11px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 1px 4px rgba(0,0,0,.35);
+  }
+  .foto-x:active{opacity:.7}
+  .foto-add{
+    width:56px; height:56px; border-radius:12px; background:var(--card); color:var(--accent);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 .5px var(--hairline);
+  }
+  .foto-add:active{background:rgba(0,113,227,.08)}
+  .row-thumb{
+    width:44px; height:44px; border-radius:10px; object-fit:cover; flex:0 0 auto;
+    cursor:pointer; background:#e9e9eb; box-shadow:0 0 0 .5px var(--hairline);
+  }
+
+  /* ---------- Vollbild-Viewer ---------- */
+  #viewer{
+    display:none; position:fixed; inset:0; z-index:300; background:rgba(15,15,17,.96);
+    -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    flex-direction:column; align-items:center; justify-content:center;
+  }
+  #viewer.open{display:flex}
+  #viewerImg{
+    max-width:94vw; max-height:74vh; border-radius:10px; object-fit:contain;
+    cursor:pointer; box-shadow:0 10px 50px rgba(0,0,0,.5);
+    animation:popIn .2s ease-out;
+  }
+  .viewer-close{
+    position:absolute; top:calc(10px + env(safe-area-inset-top)); right:12px;
+    width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,.14);
+    color:#fff; font-size:16px; font-weight:700; z-index:2;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .viewer-close:active{background:rgba(255,255,255,.28)}
+  .viewer-nav{
+    position:absolute; top:50%; transform:translateY(-50%); width:44px; height:72px;
+    display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.85);
+    z-index:2;
+  }
+  .viewer-nav:active{opacity:.6}
+  .viewer-nav.prev{left:2px} .viewer-nav.next{right:2px}
+  .viewer-meta{margin-top:16px; text-align:center; color:#fff; padding:0 24px; max-width:94vw}
+  .viewer-title{font-size:15px; font-weight:600; letter-spacing:-.01em;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .viewer-count{font-size:13px; color:rgba(255,255,255,.65); margin-top:3px; min-height:16px}
+
+  /* ---------- Lieferscheine & Boxen ---------- */
+  .ls-card{
+    background:var(--card); border-radius:16px; overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+  }
+  .ls-add{
+    width:100%; min-height:56px; padding:14px 16px;
+    display:flex; align-items:center; justify-content:center; gap:9px;
+    color:var(--accent); font-size:16px; font-weight:600;
+  }
+  .ls-add:active{background:rgba(0,113,227,.06)}
+  .ls-add svg{flex:0 0 auto}
+  .ls-row{display:flex; align-items:center; gap:12px; padding:10px 14px;
+    border-top:.5px solid var(--hairline)}
+  .ls-thumb{
+    width:56px; height:56px; border-radius:10px; object-fit:cover; flex:0 0 auto;
+    cursor:pointer; background:#e9e9eb; box-shadow:0 0 0 .5px var(--hairline);
+  }
+  .ls-main{flex:1; min-width:0; cursor:pointer; padding:4px 0}
+  .ls-title{font-size:15px; font-weight:600; letter-spacing:-.01em;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .ls-date{font-size:13px; color:var(--muted); margin-top:1px}
+  .ls-del{
+    width:44px; height:44px; border-radius:12px; flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center; color:var(--muted);
+    font-size:12px; font-weight:700; transition:background .15s,color .15s;
+  }
+  .ls-del.armed{background:var(--red); color:#fff}
+  .ls-empty{padding:16px; color:var(--muted); font-size:14px; text-align:center;
+    border-top:.5px solid var(--hairline)}
+  .ls-preview{
+    display:block; width:100%; max-height:300px; object-fit:contain;
+    background:#e9e9eb; border-radius:14px; margin-bottom:14px;
+    box-shadow:0 0 0 .5px var(--hairline);
+  }
+  #lsMsg{color:var(--red); font-size:13px; margin-top:12px; text-align:center; min-height:16px}
 
   /* ---------- Urgent ---------- */
   .urgent{
@@ -244,10 +345,12 @@
   }
   .urgent.show{display:block}
   .urgent-head{
-    display:flex; align-items:center; gap:8px; padding:13px 16px 11px;
+    display:flex; align-items:center; flex-wrap:wrap; gap:8px; row-gap:9px;
+    padding:13px 16px 11px;
     color:#d70015; font-size:15px; font-weight:700; letter-spacing:-.01em;
     background:linear-gradient(180deg, rgba(255,59,48,.08), rgba(255,59,48,0));
   }
+  .urgent-head .u-title{white-space:nowrap}
   .urgent-head svg{flex:0 0 auto}
   .urgent-head .u-total{
     margin-left:auto; font-size:12px; font-weight:700; color:#fff; background:var(--red);
@@ -276,6 +379,14 @@
     color:var(--accent); font-size:13px; font-weight:700;
   }
   .u-plus:active{background:rgba(0,113,227,.2)}
+  .u-mail{
+    margin-left:auto; height:34px; padding:0 10px; border-radius:17px;
+    background:rgba(0,113,227,.1); color:var(--accent); font-size:12px; font-weight:700;
+    display:flex; align-items:center; gap:5px; flex:0 0 auto; white-space:nowrap;
+  }
+  .u-mail:active{background:rgba(0,113,227,.2)}
+  .u-mail svg{flex:0 0 auto}
+  .urgent-head .u-total{margin-left:0}
   @keyframes flashRow{0%{background:rgba(0,113,227,.14)}100%{background:transparent}}
   .item.flash{animation:flashRow 1.2s ease-out}
 
@@ -308,7 +419,7 @@
 
   /* ---------- Desktop ---------- */
   @media(min-width:640px){
-    #sheetOverlay{align-items:center; padding:20px}
+    #sheetOverlay,#lsOverlay{align-items:center; padding:20px}
     .sheet{
       width:440px; border-radius:20px; max-height:86vh;
       animation:popIn .25s cubic-bezier(.3,.8,.4,1);
@@ -394,6 +505,19 @@
 
     <div id="list"></div>
 
+    <div class="group-title">Lieferscheine &amp; Boxen</div>
+    <div class="ls-card">
+      <button class="ls-add" onclick="lsCapture()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+          <circle cx="12" cy="13" r="4"/>
+        </svg>
+        <span>Lieferschein fotografieren</span>
+      </button>
+      <div id="lsList"></div>
+    </div>
+
     <div class="app-footer">
       <button class="demo-reset" onclick="demoReset()">Demo zurücksetzen</button>
     </div>
@@ -430,12 +554,61 @@
     </div>
     <div class="field"><label>Notiz</label>
       <textarea id="fNotiz" placeholder="optional" maxlength="300"></textarea></div>
+    <div class="field"><label>Fotos (max. 3)</label>
+      <div class="foto-row" id="fFotos"></div></div>
     <button class="btn-primary" id="sheetSave" onclick="saveItem()">Sichern</button>
+    <button class="btn-mail" id="sheetMail" onclick="mailItem()">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>
+      </svg>
+      Per Mail melden</button>
     <button class="btn-danger" id="sheetDelete" onclick="deleteItem()" style="display:none">
       Artikel löschen</button>
     <div id="sheetMsg"></div>
   </div>
 </div>
+
+<!-- ================= Lieferschein-Sheet ================= -->
+<div id="lsOverlay" onclick="if(event.target===this)closeLsSheet()">
+  <div class="sheet">
+    <div class="grabber"></div>
+    <div class="sheet-head">
+      <h2>Lieferschein</h2>
+      <button class="sheet-close" onclick="closeLsSheet()">✕</button>
+    </div>
+    <img id="lsPreview" class="ls-preview" alt="Lieferschein-Aufnahme">
+    <div class="field"><label>Titel (optional)</label>
+      <input type="text" id="lsTitel" placeholder="z.B. Lieferung Max&amp;Moi" maxlength="120"
+             onkeydown="if(event.key==='Enter')saveLs()"></div>
+    <button class="btn-primary" id="lsSave" onclick="saveLs()">Sichern</button>
+    <div id="lsMsg"></div>
+  </div>
+</div>
+
+<!-- ================= Vollbild-Viewer ================= -->
+<div id="viewer" onclick="if(event.target===this)closeViewer()">
+  <button class="viewer-close" onclick="closeViewer()" aria-label="Schliessen">✕</button>
+  <button class="viewer-nav prev" id="vwPrev" onclick="vwStep(-1)" aria-label="Vorheriges Foto">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+  </button>
+  <img id="viewerImg" alt="" onclick="vwStep(1)">
+  <button class="viewer-nav next" id="vwNext" onclick="vwStep(1)" aria-label="Nächstes Foto">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="9 18 15 12 9 6"/>
+    </svg>
+  </button>
+  <div class="viewer-meta">
+    <div class="viewer-title" id="viewerTitle"></div>
+    <div class="viewer-count" id="viewerCount"></div>
+  </div>
+</div>
+
+<input type="file" id="fotoInput" accept="image/*" capture="environment" hidden>
 
 <div id="toast"></div>
 
@@ -444,6 +617,7 @@ const API = location.origin;
 const LS_KEY = 'inventar_token';
 const DEMO = location.hostname.endsWith('github.io') || location.protocol === 'file:' || new URLSearchParams(location.search).has('demo');
 const DEMO_KEY = 'tonja_inventar_demo';
+const DEMO_LS_KEY = 'tonja_inventar_demo_lieferscheine';
 const DEMO_CODE = '0000';
 let TOKEN = localStorage.getItem(LS_KEY) || '';
 let ITEMS = [];
@@ -452,6 +626,10 @@ let KATEGORIEN = ['Damen','Accessoires','ARCHIVES','Sonstiges'];
 let LOC = 'Alle', KAT = 'Alle', Q = '';
 let EDIT_ID = null;          // null = neuer Artikel
 let sheetKat = null, sheetLoc = null;
+let sheetFotos = [];         // dataURLs des offenen Artikel-Sheets
+let fotoTarget = 'item';     // 'item' | 'ls' — wohin die nächste Aufnahme geht
+let lsPendingFoto = null;    // frisch aufgenommener Lieferschein (dataURL)
+let LS_ITEMS = [];           // Lieferscheine & Boxen
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g,
@@ -500,13 +678,42 @@ function demoLoad(){
   return items;
 }
 
+function demoPut(key, value){
+  try{
+    localStorage.setItem(key, value);
+  }catch(e){
+    const err = new Error('Speicher voll — alte Fotos löschen');
+    err.status = 507;
+    throw err;
+  }
+}
+
 function demoSave(items){
-  localStorage.setItem(DEMO_KEY, JSON.stringify(items));
+  demoPut(DEMO_KEY, JSON.stringify(items));
+}
+
+function demoLsLoad(){
+  try{
+    const list = JSON.parse(localStorage.getItem(DEMO_LS_KEY));
+    if(Array.isArray(list)) return list;
+  }catch(e){ /* korrupte Daten -> leer starten */ }
+  return [];
+}
+
+function demoLsSave(list){
+  demoPut(DEMO_LS_KEY, JSON.stringify(list));
 }
 
 function demoReset(){
   localStorage.removeItem(DEMO_KEY);
+  localStorage.removeItem(DEMO_LS_KEY);
   location.reload();
+}
+
+function demoSanitizeFotos(v){
+  return Array.isArray(v)
+    ? v.filter(f => typeof f === 'string' && f.startsWith('data:image/')).slice(0, 3)
+    : [];
 }
 
 function demoApi(method, path, body){
@@ -526,10 +733,38 @@ function demoApi(method, path, body){
           id:'demo-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6)};
         item.bestand = Math.max(0, parseInt(item.bestand, 10) || 0);
         item.min_bestand = Math.max(0, parseInt(item.min_bestand, 10) || 0);
+        item.fotos = demoSanitizeFotos(item.fotos);
         items.push(item);
         demoSave(items);
         return resolve({ok:true, item:{...item}});
       }
+    }
+    if(path === '/api/inventar/lieferscheine'){
+      const scheine = demoLsLoad();
+      if(method === 'GET') return resolve({lieferscheine: scheine});
+      if(method === 'POST'){
+        const foto = body && body.foto;
+        if(typeof foto !== 'string' || !foto.startsWith('data:image/'))
+          return fail(400, 'Foto fehlt');
+        const schein = {
+          id:'ls-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          created_at: new Date().toISOString(),
+          titel: String((body && body.titel) || '').slice(0, 120),
+          foto,
+        };
+        scheine.unshift(schein);
+        demoLsSave(scheine);
+        return resolve({ok:true, lieferschein:{...schein}});
+      }
+    }
+    const lm = path.match(/^\/api\/inventar\/lieferscheine\/([^/]+)$/);
+    if(lm && method === 'DELETE'){
+      const scheine = demoLsLoad();
+      const idx = scheine.findIndex(x => x.id === lm[1]);
+      if(idx < 0) return fail(404, 'Lieferschein nicht gefunden');
+      scheine.splice(idx, 1);
+      demoLsSave(scheine);
+      return resolve({ok:true});
     }
     const m = path.match(/^\/api\/inventar\/items\/([^/]+)$/);
     if(m){
@@ -541,6 +776,7 @@ function demoApi(method, path, body){
           if(body && k in body) it[k] = String(body[k]); });
         ['bestand','min_bestand'].forEach(k=>{
           if(body && k in body) it[k] = Math.max(0, parseInt(body[k], 10) || 0); });
+        if(body && 'fotos' in body) it.fotos = demoSanitizeFotos(body.fotos);
         demoSave(items);
         return resolve({ok:true, item:{...it}});
       }
@@ -603,6 +839,7 @@ async function enterApp(){
   $('login').style.display = 'none';
   $('app').style.display = 'block';
   await load();
+  await loadLs();
 }
 
 /* ---------------- Data ---------------- */
@@ -689,13 +926,17 @@ function filtered(){
     (!Q || (it.name+' '+(it.marke||'')+' '+(it.notiz||'')).toLowerCase().includes(Q)));
 }
 
-function renderUrgent(){
-  const box = $('urgent');
-  const rows = ITEMS.filter(it => status(it) !== 'ok')
+function urgentRows(){
+  return ITEMS.filter(it => status(it) !== 'ok')
     .sort((a, b)=>{
       const ra = status(a)==='out' ? 0 : 1, rb = status(b)==='out' ? 0 : 1;
       return ra - rb || String(a.name).localeCompare(String(b.name), 'de');
     });
+}
+
+function renderUrgent(){
+  const box = $('urgent');
+  const rows = urgentRows();
   if(!rows.length){ box.classList.remove('show'); box.innerHTML = ''; return; }
   box.innerHTML =
     '<div class="urgent-head">'+
@@ -705,7 +946,14 @@ function renderUrgent(){
           '1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>'+
         '<line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>'+
       '</svg>'+
-      '<span>Dringend nachbestellen</span>'+
+      '<span class="u-title">Dringend nachbestellen</span>'+
+      '<button class="u-mail" onclick="mailUrgent()" title="Nachbestellung als Mail-Entwurf">'+
+        '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
+          'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+
+          '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>'+
+        '</svg>'+
+        '<span>Mail-Entwurf</span>'+
+      '</button>'+
       '<span class="u-total">'+rows.length+'</span>'+
     '</div>'+
     '<table><thead><tr><th>Artikel</th><th>Standort</th>'+
@@ -723,6 +971,45 @@ function renderUrgent(){
     }).join('')+
     '</tbody></table>';
   box.classList.add('show');
+}
+
+/* ---------------- Nachbestell-Maildraft ---------------- */
+
+function fmtDatum(d){
+  return String(d.getDate()).padStart(2,'0') + '.' +
+    String(d.getMonth()+1).padStart(2,'0') + '.' + d.getFullYear();
+}
+
+function mailtoFor(items){
+  const lines = [];
+  const locs = [...STANDORTE, ...items.map(it=>it.standort)
+    .filter(loc => !STANDORTE.includes(loc))];
+  locs.forEach(loc=>{
+    const arr = items.filter(it => it.standort === loc);
+    if(!arr.length) return;
+    if(lines.length) lines.push('');
+    lines.push(loc + ':');
+    arr.forEach(it=>{
+      const label = (it.marke ? it.marke + ' ' : '') + it.name;
+      lines.push('• ' + label + ' — ' + it.standort +
+        ' — Bestand ' + (+it.bestand) + ' (Min ' + (+it.min_bestand) + ')');
+    });
+  });
+  lines.push('', '—', 'Erstellt mit dem Tonja Inventar-Tool');
+  const subject = 'Nachbestellung Tonja — ' + fmtDatum(new Date());
+  return 'mailto:?subject=' + encodeURIComponent(subject) +
+    '&body=' + encodeURIComponent(lines.join('\r\n'));
+}
+
+function mailUrgent(){
+  const rows = urgentRows();
+  if(!rows.length){ toast('Keine dringenden Artikel'); return; }
+  location.href = mailtoFor(rows);
+}
+
+function mailItem(){
+  const it = ITEMS.find(x => x.id === EDIT_ID);
+  if(it) location.href = mailtoFor([it]);
 }
 
 function gotoItem(id){
@@ -773,7 +1060,11 @@ function rowHTML(it){
   const badge = st==='out' ? '<span class="badge out">Ausverkauft</span>'
               : st==='low' ? '<span class="badge low">Fast leer</span>' : '';
   const sub = [it.marke, it.kategorie].filter(Boolean).map(esc).join(' · ');
-  return '<div class="item" data-id="'+esc(it.id)+'">'+
+  const thumb = (it.fotos && it.fotos.length)
+    ? '<img class="row-thumb" src="'+it.fotos[0]+'" alt="" '+
+      'onclick="viewItemFotos(\''+esc(it.id)+'\')">'
+    : '';
+  return '<div class="item" data-id="'+esc(it.id)+'">'+ thumb +
     '<div class="item-main" onclick="openSheet(\''+esc(it.id)+'\')">'+
       '<div class="item-name">'+esc(it.name)+badge+'</div>'+
       (sub ? '<div class="item-sub">'+sub+'</div>' : '')+
@@ -846,6 +1137,9 @@ function openSheet(id){
   sheetLoc = it ? it.standort : (LOC!=='Alle' ? LOC : null);
   pickButtons('fKat', KATEGORIEN, sheetKat, v=>sheetKat=v);
   pickButtons('fLoc', STANDORTE, sheetLoc, v=>sheetLoc=v);
+  sheetFotos = it ? (it.fotos||[]).slice(0, 3) : [];
+  renderSheetFotos();
+  $('sheetMail').classList.toggle('show', !!it);
   const del = $('sheetDelete');
   del.style.display = it ? 'block' : 'none';
   del.classList.remove('armed');
@@ -866,6 +1160,7 @@ async function saveItem(){
     bestand: parseInt($('fBestand').value,10) || 0,
     min_bestand: parseInt($('fMin').value,10) || 0,
     notiz: $('fNotiz').value.trim(),
+    fotos: sheetFotos.slice(0, 3),
   };
   if(!body.name){ $('sheetMsg').textContent = 'Bitte Namen eingeben'; return; }
   if(!body.kategorie){ $('sheetMsg').textContent = 'Bitte Kategorie wählen'; return; }
@@ -901,6 +1196,241 @@ async function deleteItem(){
     closeSheet(); render();
     toast('Artikel gelöscht');
   }catch(e){ $('sheetMsg').textContent = e.message; }
+}
+
+/* ---------------- Fotos: Aufnahme + Resize ---------------- */
+
+function resizePhoto(file){
+  return new Promise((resolve, reject)=>{
+    const err = ()=>reject(new Error('Foto konnte nicht gelesen werden'));
+    const fr = new FileReader();
+    fr.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const max = 1000;
+        const sc = Math.min(1, max / Math.max(img.width, img.height, 1));
+        const c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(img.width * sc));
+        c.height = Math.max(1, Math.round(img.height * sc));
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        resolve(c.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = err;
+      img.src = fr.result;
+    };
+    fr.onerror = err;
+    fr.readAsDataURL(file);
+  });
+}
+
+function addFoto(){
+  fotoTarget = 'item';
+  $('fotoInput').click();
+}
+
+function lsCapture(){
+  fotoTarget = 'ls';
+  $('fotoInput').click();
+}
+
+$('fotoInput').addEventListener('change', async e=>{
+  const file = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if(!file) return;
+  try{
+    const dataUrl = await resizePhoto(file);
+    if(fotoTarget === 'item'){
+      if(sheetFotos.length >= 3){ toast('Maximal 3 Fotos pro Artikel'); return; }
+      sheetFotos.push(dataUrl);
+      renderSheetFotos();
+    }else{
+      openLsSheet(dataUrl);
+    }
+  }catch(err){ toast(err.message); }
+});
+
+function renderSheetFotos(){
+  const wrap = $('fFotos');
+  wrap.innerHTML = sheetFotos.map((f, i)=>
+    '<div class="foto-thumb">'+
+      '<img src="'+f+'" alt="Artikel-Foto '+(i+1)+'" onclick="viewSheetFoto('+i+')">'+
+      '<button class="foto-x" onclick="removeSheetFoto('+i+')" aria-label="Foto entfernen">✕</button>'+
+    '</div>'
+  ).join('') + (sheetFotos.length < 3
+    ? '<button class="foto-add" onclick="addFoto()" aria-label="Foto aufnehmen">'+
+        '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
+          'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+
+          '<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>'+
+          '<circle cx="12" cy="13" r="4"/>'+
+        '</svg>'+
+      '</button>'
+    : '');
+}
+
+function removeSheetFoto(i){
+  sheetFotos.splice(i, 1);
+  renderSheetFotos();
+}
+
+function viewSheetFoto(i){
+  viewFotos(sheetFotos, i, $('fName').value.trim());
+}
+
+function viewItemFotos(id){
+  const it = ITEMS.find(x => x.id === id);
+  if(it && it.fotos && it.fotos.length) viewFotos(it.fotos, 0, it.name);
+}
+
+/* ---------------- Vollbild-Viewer ---------------- */
+
+let VIEWER = {fotos:[], idx:0, title:''};
+
+function viewFotos(fotos, idx, title){
+  if(!fotos || !fotos.length) return;
+  VIEWER = {fotos, idx: Math.min(idx||0, fotos.length-1), title: title||''};
+  renderViewer();
+  $('viewer').classList.add('open');
+}
+
+function renderViewer(){
+  $('viewerImg').src = VIEWER.fotos[VIEWER.idx];
+  $('viewerTitle').textContent = VIEWER.title;
+  const multi = VIEWER.fotos.length > 1;
+  $('viewerCount').textContent = multi
+    ? (VIEWER.idx+1) + ' / ' + VIEWER.fotos.length : '';
+  $('vwPrev').style.display = multi ? 'flex' : 'none';
+  $('vwNext').style.display = multi ? 'flex' : 'none';
+}
+
+function vwStep(d){
+  const n = VIEWER.fotos.length;
+  if(n < 2) return;
+  VIEWER.idx = (VIEWER.idx + d + n) % n;
+  renderViewer();
+}
+
+function closeViewer(){ $('viewer').classList.remove('open'); }
+
+// Swipe durch Fotos
+let vwTouchX = null;
+$('viewer').addEventListener('touchstart', e=>{
+  vwTouchX = e.touches[0].clientX;
+}, {passive:true});
+$('viewer').addEventListener('touchend', e=>{
+  if(vwTouchX === null) return;
+  const dx = e.changedTouches[0].clientX - vwTouchX;
+  vwTouchX = null;
+  if(Math.abs(dx) > 40) vwStep(dx < 0 ? 1 : -1);
+}, {passive:true});
+
+document.addEventListener('keydown', e=>{
+  if($('viewer').classList.contains('open')){
+    if(e.key === 'Escape') closeViewer();
+    if(e.key === 'ArrowRight') vwStep(1);
+    if(e.key === 'ArrowLeft') vwStep(-1);
+    return;
+  }
+  if(e.key !== 'Escape') return;
+  if($('lsOverlay').classList.contains('open')) closeLsSheet();
+  else if($('sheetOverlay').classList.contains('open')) closeSheet();
+});
+
+/* ---------------- Lieferscheine & Boxen ---------------- */
+
+async function loadLs(){
+  try{
+    const res = await api('GET', '/api/inventar/lieferscheine');
+    LS_ITEMS = res.lieferscheine || [];
+    renderLs();
+  }catch(e){
+    LS_ITEMS = [];
+    renderLs(e.status === 503 ? e.message : null);
+    if(e.status !== 503 && e.status !== 401) toast(e.message);
+  }
+}
+
+function fmtIso(iso){
+  const d = new Date(iso);
+  return isNaN(d) ? '' : fmtDatum(d);
+}
+
+function renderLs(errMsg){
+  const wrap = $('lsList');
+  if(errMsg){
+    wrap.innerHTML = '<div class="ls-empty">'+esc(errMsg)+'</div>';
+    return;
+  }
+  if(!LS_ITEMS.length){
+    wrap.innerHTML = '<div class="ls-empty">Noch keine Lieferscheine erfasst</div>';
+    return;
+  }
+  wrap.innerHTML = LS_ITEMS.map(ls=>
+    '<div class="ls-row">'+
+      '<img class="ls-thumb" src="'+ls.foto+'" alt="" onclick="viewLs(\''+esc(ls.id)+'\')">'+
+      '<div class="ls-main" onclick="viewLs(\''+esc(ls.id)+'\')">'+
+        '<div class="ls-title">'+esc(ls.titel || 'Lieferschein')+'</div>'+
+        '<div class="ls-date">'+esc(fmtIso(ls.created_at))+'</div>'+
+      '</div>'+
+      '<button class="ls-del" onclick="lsDelete(this,\''+esc(ls.id)+'\')" '+
+        'aria-label="Lieferschein löschen">'+
+        '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
+          'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">'+
+          '<polyline points="3 6 5 6 21 6"/>'+
+          '<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 '+
+            '2-2h4a2 2 0 0 1 2 2v2"/>'+
+        '</svg>'+
+      '</button>'+
+    '</div>'
+  ).join('');
+}
+
+function viewLs(id){
+  const ls = LS_ITEMS.find(x => x.id === id);
+  if(ls) viewFotos([ls.foto], 0,
+    (ls.titel || 'Lieferschein') + ' · ' + fmtIso(ls.created_at));
+}
+
+function openLsSheet(dataUrl){
+  lsPendingFoto = dataUrl;
+  $('lsPreview').src = dataUrl;
+  $('lsTitel').value = '';
+  $('lsMsg').textContent = '';
+  $('lsOverlay').classList.add('open');
+}
+
+function closeLsSheet(){
+  $('lsOverlay').classList.remove('open');
+  lsPendingFoto = null;
+}
+
+async function saveLs(){
+  if(!lsPendingFoto) return;
+  const btn = $('lsSave');
+  btn.disabled = true;
+  try{
+    const res = await api('POST', '/api/inventar/lieferscheine',
+      {titel: $('lsTitel').value.trim(), foto: lsPendingFoto});
+    LS_ITEMS.unshift(res.lieferschein);
+    closeLsSheet();
+    renderLs();
+    toast('Lieferschein gespeichert');
+  }catch(e){ $('lsMsg').textContent = e.message; }
+  btn.disabled = false;
+}
+
+async function lsDelete(btn, id){
+  if(!btn.classList.contains('armed')){
+    btn.classList.add('armed');
+    clearTimeout(btn._tm);
+    btn._tm = setTimeout(()=>btn.classList.remove('armed'), 3500);
+    return;
+  }
+  try{
+    await api('DELETE', '/api/inventar/lieferscheine/'+id);
+    LS_ITEMS = LS_ITEMS.filter(x => x.id !== id);
+    renderLs();
+    toast('Lieferschein gelöscht');
+  }catch(e){ toast(e.message); }
 }
 
 /* ---------------- Navbar blur on scroll ---------------- */

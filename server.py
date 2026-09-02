@@ -15,15 +15,21 @@ ROUTES = {
     'POST': [
         (re.compile(r'^/api/inventar/login$'), inventar.handle_login),
         (re.compile(r'^/api/inventar/items$'), inventar.handle_create),
+        (re.compile(r'^/api/inventar/lieferscheine$'),
+         inventar.handle_ls_create),
     ],
     'GET': [
         (re.compile(r'^/api/inventar/items$'), inventar.handle_list),
+        (re.compile(r'^/api/inventar/lieferscheine$'),
+         inventar.handle_ls_list),
     ],
     'PATCH': [
         (re.compile(r'^/api/inventar/items/([^/]+)$'), inventar.handle_update),
     ],
     'DELETE': [
         (re.compile(r'^/api/inventar/items/([^/]+)$'), inventar.handle_delete),
+        (re.compile(r'^/api/inventar/lieferscheine/([^/]+)$'),
+         inventar.handle_ls_delete),
     ],
 }
 

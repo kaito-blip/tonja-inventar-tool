@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS public.inventar_items (
               CHECK (standort IN ('Basel', 'Basel ARCHIVES', 'Gstaad', 'Genf', 'Lager')),
   bestand     integer NOT NULL DEFAULT 0 CHECK (bestand >= 0),
   min_bestand integer NOT NULL DEFAULT 1 CHECK (min_bestand >= 0),
-  notiz       text NOT NULL DEFAULT ''
+  notiz       text NOT NULL DEFAULT '',
+  -- Bis zu 3 Artikel-Fotos als data:image-URLs (client-seitig verkleinert).
+  fotos       jsonb NOT NULL DEFAULT '[]'::jsonb
 );
 
 -- List view reads grouped by standort, sorted by name.
@@ -25,6 +27,21 @@ CREATE INDEX IF NOT EXISTS inventar_items_standort_name_idx
 
 -- Service-role access only (backend uses the service key; no anon access).
 ALTER TABLE public.inventar_items ENABLE ROW LEVEL SECURITY;
+
+-- Lieferscheine & Boxen: abfotografierte Lieferscheine mit optionalem Titel.
+-- foto = data:image-URL (client-seitig auf max. 1000px verkleinert, JPEG).
+CREATE TABLE IF NOT EXISTS public.inventar_lieferscheine (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  titel      text NOT NULL DEFAULT '',
+  foto       text NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS inventar_lieferscheine_created_idx
+  ON public.inventar_lieferscheine (created_at DESC);
+
+-- Service-role access only (wie inventar_items).
+ALTER TABLE public.inventar_lieferscheine ENABLE ROW LEVEL SECURITY;
 
 -- Seed: Beispielartikel aus der Tonja-Welt — nur wenn die Tabelle leer ist,
 -- damit ein erneutes Ausführen keine Duplikate erzeugt.

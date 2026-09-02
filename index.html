@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Inventar — Tonja</title>
+<style>
+  :root{
+    --bg:#f5f5f7; --card:#fff; --text:#1d1d1f; --muted:#86868b;
+    --accent:#0071e3; --green:#34c759; --orange:#ff9500; --red:#ff3b30;
+    --hairline:rgba(0,0,0,.08); --track:#e9e9eb;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text','Helvetica Neue',sans-serif;
+    background:var(--bg); color:var(--text); font-size:16px;
+    -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  button{font-family:inherit; border:none; background:none; cursor:pointer; color:inherit}
+  input,select,textarea{font-family:inherit; font-size:16px; color:inherit}
+
+  /* ---------- Login ---------- */
+  #login{display:flex; align-items:center; justify-content:center; min-height:100vh; padding:20px}
+  .login-card{
+    background:var(--card); border-radius:18px; padding:44px 32px 36px; width:100%; max-width:380px;
+    box-shadow:0 1px 2px rgba(0,0,0,.04), 0 12px 40px rgba(0,0,0,.08); text-align:center;
+  }
+  .lock-wrap{
+    width:72px;height:72px;border-radius:50%;background:rgba(0,113,227,.1);
+    display:flex;align-items:center;justify-content:center;margin:0 auto 20px;
+  }
+  .login-card h1{font-size:24px; font-weight:700; letter-spacing:-.02em; margin-bottom:6px}
+  .login-card p{color:var(--muted); font-size:14px; margin-bottom:26px}
+  .login-card input{
+    width:100%; height:48px; border:1px solid var(--hairline); border-radius:12px;
+    background:var(--bg); padding:0 16px; text-align:center; outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  .login-card input:focus{border-color:var(--accent); box-shadow:0 0 0 3px rgba(0,113,227,.15)}
+  .btn-primary{
+    display:block; width:100%; height:48px; margin-top:14px; border-radius:12px;
+    background:var(--accent); color:#fff; font-size:16px; font-weight:600;
+    transition:opacity .15s;
+  }
+  .btn-primary:active{opacity:.75}
+  #loginMsg{color:var(--red); font-size:13px; margin-top:14px; min-height:18px}
+
+  /* ---------- App shell ---------- */
+  #app{display:none; padding-bottom:60px}
+  .navbar{
+    position:fixed; top:0; left:0; right:0; z-index:50; height:52px;
+    display:flex; align-items:center; justify-content:space-between; padding:0 12px;
+    background:transparent; transition:background .25s;
+  }
+  .navbar.scrolled{
+    background:rgba(245,245,247,.72);
+    -webkit-backdrop-filter:blur(20px) saturate(180%); backdrop-filter:blur(20px) saturate(180%);
+    border-bottom:.5px solid var(--hairline);
+  }
+  .navbar .nav-title{
+    position:absolute; left:0; right:0; margin:auto; width:max-content;
+    font-size:17px; font-weight:600; opacity:0; transition:opacity .2s; pointer-events:none;
+  }
+  .navbar.scrolled .nav-title{opacity:1}
+  .nav-btn{
+    min-width:44px; height:44px; display:flex; align-items:center; justify-content:center;
+    color:var(--accent); font-size:16px; border-radius:12px;
+  }
+  .nav-btn:active{opacity:.6}
+  .nav-btn svg{display:block}
+
+  .container{max-width:680px; margin:0 auto; padding:64px 16px 0}
+  .large-title{font-size:34px; font-weight:700; letter-spacing:-.02em; margin-bottom:2px}
+  .subtitle{color:var(--muted); font-size:15px; margin-bottom:18px}
+
+  /* ---------- Summary ---------- */
+  .summary{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:0;
+    background:var(--card); border-radius:16px; padding:14px 4px; margin-bottom:16px;
+    box-shadow:0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+  }
+  .stat{text-align:center; min-width:0}
+  .stat b{display:block; font-size:22px; font-weight:700; letter-spacing:-.02em}
+  .stat span{font-size:11px; color:var(--muted); display:block; margin-top:1px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .stat.warn b{color:var(--orange)} .stat.out b{color:var(--red)}
+
+  /* ---------- Segmented control ---------- */
+  .seg-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch; margin:0 -16px 12px;
+    padding:0 16px; scrollbar-width:none}
+  .seg-scroll::-webkit-scrollbar{display:none}
+  .seg{
+    position:relative; display:inline-flex; background:var(--track); border-radius:12px;
+    padding:2px; white-space:nowrap;
+  }
+  .seg .thumb{
+    position:absolute; top:2px; bottom:2px; left:0; width:0; border-radius:10px;
+    background:#fff; box-shadow:0 1px 4px rgba(0,0,0,.12);
+    transition:transform .25s cubic-bezier(.3,.8,.4,1), width .25s cubic-bezier(.3,.8,.4,1);
+  }
+  .seg button{
+    position:relative; z-index:1; height:40px; padding:0 14px; font-size:14px; font-weight:500;
+    color:var(--text); border-radius:10px; transition:color .2s;
+  }
+  .seg button.active{font-weight:600}
+
+  /* ---------- Search ---------- */
+  .search{position:relative; margin-bottom:12px}
+  .search svg{position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--muted)}
+  .search input{
+    width:100%; height:44px; border:none; border-radius:12px; background:#e9e9eb;
+    padding:0 38px; outline:none; font-size:16px; color:var(--text);
+  }
+  .search input::placeholder{color:var(--muted)}
+  .search .clear{
+    position:absolute; right:2px; top:0; width:44px; height:44px; display:none;
+    align-items:center; justify-content:center; color:var(--muted);
+  }
+  .search.has-q .clear{display:flex}
+
+  /* ---------- Chips ---------- */
+  .chips{display:flex; gap:8px; overflow-x:auto; margin:0 -16px 18px; padding:0 16px 2px;
+    scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{
+    flex:0 0 auto; height:34px; padding:0 14px; border-radius:17px; font-size:14px;
+    background:var(--card); color:var(--text); border:.5px solid var(--hairline);
+    display:flex; align-items:center; transition:background .15s,color .15s;
+  }
+  .chip.active{background:var(--text); color:#fff; border-color:var(--text); font-weight:600}
+
+  /* ---------- List ---------- */
+  .group-title{
+    font-size:13px; font-weight:600; color:var(--muted); text-transform:uppercase;
+    letter-spacing:.06em; margin:20px 4px 8px;
+  }
+  .card-list{
+    background:var(--card); border-radius:16px; overflow:hidden;
+    box-shadow:0 1px 2px rgba(0,0,0,.04), 0 4px 16px rgba(0,0,0,.04);
+  }
+  .item{
+    display:flex; align-items:center; gap:10px; padding:12px 14px; min-height:64px;
+  }
+  .item + .item{border-top:.5px solid var(--hairline)}
+  .item-main{flex:1; min-width:0; cursor:pointer; padding:4px 0}
+  .item-name{font-size:16px; font-weight:600; letter-spacing:-.01em;
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+  .item-sub{font-size:13px; color:var(--muted); margin-top:2px}
+  .item-note{font-size:12px; color:var(--muted); margin-top:2px; font-style:italic}
+  .badge{
+    font-size:11px; font-weight:600; padding:2.5px 9px; border-radius:99px; white-space:nowrap;
+  }
+  .badge.low{background:rgba(255,149,0,.14); color:#c93400}
+  .badge.out{background:rgba(255,59,48,.13); color:#d70015}
+
+  .stepper{
+    display:flex; align-items:center; background:#f2f2f4; border-radius:22px; flex:0 0 auto;
+  }
+  .stepper button{
+    width:44px; height:44px; display:flex; align-items:center; justify-content:center;
+    color:var(--accent); border-radius:22px;
+  }
+  .stepper button:active{background:rgba(0,0,0,.06)}
+  .stepper button:disabled{color:#c7c7cc}
+  .stepper .count{
+    min-width:30px; text-align:center; font-size:17px; font-weight:700;
+    font-variant-numeric:tabular-nums;
+  }
+  .stepper .count.zero{color:var(--red)}
+
+  .empty{
+    text-align:center; color:var(--muted); padding:48px 20px; font-size:15px;
+  }
+  #tableError{
+    display:none; background:rgba(255,149,0,.12); border:.5px solid rgba(255,149,0,.3);
+    color:#8a4b00; border-radius:14px; padding:14px 16px; font-size:14px; margin-bottom:16px;
+  }
+
+  /* ---------- Sheet ---------- */
+  #sheetOverlay{
+    display:none; position:fixed; inset:0; z-index:100;
+    background:rgba(0,0,0,.35); -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+    align-items:flex-end; justify-content:center;
+  }
+  #sheetOverlay.open{display:flex}
+  .sheet{
+    background:var(--bg); width:100%; max-height:92vh; overflow-y:auto;
+    border-radius:20px 20px 0 0; padding:10px 20px calc(24px + env(safe-area-inset-bottom));
+    animation:slideUp .3s cubic-bezier(.3,.8,.4,1);
+  }
+  @keyframes slideUp{from{transform:translateY(60px);opacity:.4}to{transform:translateY(0);opacity:1}}
+  @keyframes popIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+  .grabber{width:36px;height:5px;border-radius:3px;background:#d1d1d6;margin:2px auto 14px}
+  .sheet-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px}
+  .sheet-head h2{font-size:20px; font-weight:700; letter-spacing:-.02em}
+  .sheet-close{
+    width:32px;height:32px;border-radius:50%;background:#e3e3e8;color:#7d7d83;
+    display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;
+  }
+  .field{margin-bottom:14px}
+  .field label{display:block; font-size:13px; font-weight:600; color:var(--muted); margin:0 2px 6px}
+  .field input[type=text], .field textarea{
+    width:100%; border:none; border-radius:12px; background:var(--card); padding:12px 14px;
+    outline:none; box-shadow:0 0 0 .5px var(--hairline);
+  }
+  .field input:focus, .field textarea:focus{box-shadow:0 0 0 3px rgba(0,113,227,.25)}
+  .field textarea{resize:none; height:70px}
+  .pick{display:flex; flex-wrap:wrap; gap:8px}
+  .pick button{
+    height:38px; padding:0 14px; border-radius:19px; background:var(--card); font-size:14px;
+    box-shadow:0 0 0 .5px var(--hairline);
+  }
+  .pick button.active{background:var(--accent); color:#fff; font-weight:600; box-shadow:none}
+  .num-row{display:flex; gap:12px}
+  .num-row .field{flex:1}
+  .num-field{
+    display:flex; align-items:center; justify-content:space-between; background:var(--card);
+    border-radius:12px; box-shadow:0 0 0 .5px var(--hairline); padding:0 4px;
+  }
+  .num-field button{width:44px;height:44px;color:var(--accent);font-size:20px;
+    display:flex;align-items:center;justify-content:center}
+  .num-field input{
+    width:52px; border:none; background:none; text-align:center; outline:none;
+    font-size:17px; font-weight:700; -moz-appearance:textfield;
+  }
+  .num-field input::-webkit-outer-spin-button,.num-field input::-webkit-inner-spin-button{
+    -webkit-appearance:none}
+  .sheet .btn-primary{margin-top:8px}
+  .btn-danger{
+    display:block; width:100%; height:48px; margin-top:10px; border-radius:12px;
+    background:var(--card); color:var(--red); font-size:16px; font-weight:600;
+    box-shadow:0 0 0 .5px var(--hairline);
+  }
+  .btn-danger.armed{background:var(--red); color:#fff; box-shadow:none}
+  #sheetMsg{color:var(--red); font-size:13px; margin-top:12px; text-align:center; min-height:16px}
+
+  /* ---------- Toast ---------- */
+  #toast{
+    position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px);
+    background:rgba(29,29,31,.92); color:#fff; font-size:14px; padding:11px 20px;
+    border-radius:99px; z-index:200; transition:transform .3s; max-width:88vw; text-align:center;
+    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  }
+  #toast.show{transform:translateX(-50%) translateY(0)}
+
+  /* ---------- Desktop ---------- */
+  @media(min-width:640px){
+    #sheetOverlay{align-items:center; padding:20px}
+    .sheet{
+      width:440px; border-radius:20px; max-height:86vh;
+      animation:popIn .25s cubic-bezier(.3,.8,.4,1);
+      box-shadow:0 20px 60px rgba(0,0,0,.25);
+    }
+    .grabber{display:none}
+    .seg-scroll,.chips{margin-left:0;margin-right:0;padding-left:0;padding-right:0}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= Login ================= -->
+<div id="login">
+  <div class="login-card">
+    <div class="lock-wrap">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#0071e3"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="10.5" width="16" height="10" rx="2.5"/>
+        <path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/>
+        <circle cx="12" cy="15.5" r="1.4" fill="#0071e3" stroke="none"/>
+      </svg>
+    </div>
+    <h1>Inventar</h1>
+    <p>Tonja Concept — Bestandsführung</p>
+    <input type="password" id="codeInput" placeholder="Zugangscode" autocomplete="current-password"
+           onkeydown="if(event.key==='Enter')login()">
+    <button class="btn-primary" onclick="login()">Anmelden</button>
+    <div id="loginMsg"></div>
+  </div>
+</div>
+
+<!-- ================= App ================= -->
+<div id="app">
+  <div class="navbar" id="navbar">
+    <button class="nav-btn" onclick="logout()" title="Abmelden">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </button>
+    <div class="nav-title">Inventar</div>
+    <button class="nav-btn" onclick="openSheet()" title="Artikel hinzufügen">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+    </button>
+  </div>
+
+  <div class="container">
+    <div class="large-title">Inventar</div>
+    <div class="subtitle">Tonja Concept</div>
+
+    <div id="tableError"></div>
+
+    <div class="summary" id="summary"></div>
+
+    <div class="seg-scroll"><div class="seg" id="seg"><div class="thumb"></div></div></div>
+
+    <div class="search" id="searchWrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/>
+      </svg>
+      <input type="search" id="q" placeholder="Suchen" oninput="onSearch()">
+      <button class="clear" onclick="clearSearch()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round">
+          <line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="chips" id="chips"></div>
+
+    <div id="list"></div>
+  </div>
+</div>
+
+<!-- ================= Sheet ================= -->
+<div id="sheetOverlay" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet">
+    <div class="grabber"></div>
+    <div class="sheet-head">
+      <h2 id="sheetTitle">Neuer Artikel</h2>
+      <button class="sheet-close" onclick="closeSheet()">✕</button>
+    </div>
+    <div class="field"><label>Name</label>
+      <input type="text" id="fName" placeholder="z.B. Seidentuch «Jardin»" maxlength="120"></div>
+    <div class="field"><label>Marke</label>
+      <input type="text" id="fMarke" placeholder="z.B. Max&amp;Moi" maxlength="80"></div>
+    <div class="field"><label>Kategorie</label><div class="pick" id="fKat"></div></div>
+    <div class="field"><label>Standort</label><div class="pick" id="fLoc"></div></div>
+    <div class="num-row">
+      <div class="field"><label>Bestand</label>
+        <div class="num-field">
+          <button onclick="bump('fBestand',-1)">−</button>
+          <input type="number" id="fBestand" value="1" min="0" inputmode="numeric">
+          <button onclick="bump('fBestand',1)">+</button>
+        </div></div>
+      <div class="field"><label>Min. Bestand</label>
+        <div class="num-field">
+          <button onclick="bump('fMin',-1)">−</button>
+          <input type="number" id="fMin" value="1" min="0" inputmode="numeric">
+          <button onclick="bump('fMin',1)">+</button>
+        </div></div>
+    </div>
+    <div class="field"><label>Notiz</label>
+      <textarea id="fNotiz" placeholder="optional" maxlength="300"></textarea></div>
+    <button class="btn-primary" id="sheetSave" onclick="saveItem()">Sichern</button>
+    <button class="btn-danger" id="sheetDelete" onclick="deleteItem()" style="display:none">
+      Artikel löschen</button>
+    <div id="sheetMsg"></div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = location.origin;
+const LS_KEY = 'inventar_token';
+let TOKEN = localStorage.getItem(LS_KEY) || '';
+let ITEMS = [];
+let STANDORTE = ['Basel','Basel ARCHIVES','Gstaad','Genf','Lager'];
+let KATEGORIEN = ['Damen','Accessoires','ARCHIVES','Sonstiges'];
+let LOC = 'Alle', KAT = 'Alle', Q = '';
+let EDIT_ID = null;          // null = neuer Artikel
+let sheetKat = null, sheetLoc = null;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g,
+  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+async function api(method, path, body){
+  const opt = {method, headers:{'Content-Type':'application/json'}};
+  if(TOKEN) opt.headers['Authorization'] = 'Bearer ' + TOKEN;
+  if(body) opt.body = JSON.stringify(body);
+  const r = await fetch(API + path, opt);
+  const data = await r.json().catch(()=>({}));
+  if(!r.ok){
+    const e = new Error(data.error || ('Fehler ' + r.status));
+    e.status = r.status;
+    throw e;
+  }
+  return data;
+}
+
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+/* ---------------- Auth ---------------- */
+
+async function login(){
+  const code = $('codeInput').value.trim();
+  if(!code){ $('loginMsg').textContent = 'Bitte Zugangscode eingeben'; return; }
+  try{
+    const res = await api('POST', '/api/inventar/login', {code});
+    TOKEN = res.token;
+    localStorage.setItem(LS_KEY, TOKEN);
+    $('loginMsg').textContent = '';
+    await enterApp();
+  }catch(e){ $('loginMsg').textContent = e.message; }
+}
+
+function logout(){
+  localStorage.removeItem(LS_KEY);
+  TOKEN = ''; ITEMS = [];
+  $('app').style.display = 'none';
+  $('login').style.display = 'flex';
+  $('codeInput').value = '';
+}
+
+async function enterApp(){
+  $('login').style.display = 'none';
+  $('app').style.display = 'block';
+  await load();
+}
+
+/* ---------------- Data ---------------- */
+
+async function load(){
+  try{
+    const res = await api('GET', '/api/inventar/items');
+    ITEMS = res.items || [];
+    if(res.standorte) STANDORTE = res.standorte;
+    if(res.kategorien) KATEGORIEN = res.kategorien;
+    $('tableError').style.display = 'none';
+    buildSeg(); buildChips(); render();
+  }catch(e){
+    if(e.status === 401){ logout(); $('loginMsg').textContent = e.message; return; }
+    if(e.status === 503){
+      buildSeg(); buildChips(); render();
+      const el = $('tableError');
+      el.textContent = e.message;
+      el.style.display = 'block';
+      return;
+    }
+    toast(e.message);
+  }
+}
+
+/* ---------------- Filters ---------------- */
+
+function buildSeg(){
+  const seg = $('seg');
+  seg.querySelectorAll('button').forEach(b=>b.remove());
+  ['Alle', ...STANDORTE].forEach(loc=>{
+    const b = document.createElement('button');
+    b.textContent = loc;
+    b.className = loc===LOC ? 'active' : '';
+    b.onclick = ()=>{ LOC = loc; buildSeg(); render(); };
+    seg.appendChild(b);
+  });
+  requestAnimationFrame(moveThumb);
+}
+
+function moveThumb(){
+  const seg = $('seg');
+  const active = seg.querySelector('button.active');
+  const thumb = seg.querySelector('.thumb');
+  if(!active){ thumb.style.width = '0'; return; }
+  thumb.style.width = active.offsetWidth + 'px';
+  thumb.style.transform = 'translateX(' + active.offsetLeft + 'px)';
+  active.scrollIntoView({inline:'nearest', block:'nearest'});
+}
+window.addEventListener('resize', moveThumb);
+
+function buildChips(){
+  const wrap = $('chips');
+  wrap.innerHTML = '';
+  ['Alle', ...KATEGORIEN].forEach(kat=>{
+    const b = document.createElement('button');
+    b.className = 'chip' + (kat===KAT ? ' active' : '');
+    b.textContent = kat;
+    b.onclick = ()=>{ KAT = kat; buildChips(); render(); };
+    wrap.appendChild(b);
+  });
+}
+
+function onSearch(){
+  Q = $('q').value.trim().toLowerCase();
+  $('searchWrap').classList.toggle('has-q', !!Q);
+  render();
+}
+function clearSearch(){ $('q').value=''; onSearch(); }
+
+/* ---------------- Render ---------------- */
+
+function status(it){
+  const b = +it.bestand, m = +it.min_bestand;
+  if(b === 0) return 'out';
+  if(b < m) return 'low';
+  return 'ok';
+}
+
+function filtered(){
+  return ITEMS.filter(it =>
+    (LOC==='Alle' || it.standort===LOC) &&
+    (KAT==='Alle' || it.kategorie===KAT) &&
+    (!Q || (it.name+' '+(it.marke||'')+' '+(it.notiz||'')).toLowerCase().includes(Q)));
+}
+
+function render(){
+  const items = filtered();
+
+  // Summenzeile
+  const stueck = items.reduce((s,it)=>s + (+it.bestand||0), 0);
+  const low = items.filter(it=>status(it)==='low').length;
+  const out = items.filter(it=>status(it)==='out').length;
+  $('summary').innerHTML =
+    '<div class="stat"><b>'+items.length+'</b><span>Artikel</span></div>'+
+    '<div class="stat"><b>'+stueck+'</b><span>Stück</span></div>'+
+    '<div class="stat'+(low?' warn':'')+'"><b>'+low+'</b><span>Fast leer</span></div>'+
+    '<div class="stat'+(out?' out':'')+'"><b>'+out+'</b><span>Ausverkauft</span></div>';
+
+  // Liste (gruppiert nach Standort wenn «Alle»)
+  const list = $('list');
+  if(!items.length){
+    list.innerHTML = '<div class="empty">Keine Artikel gefunden</div>';
+    return;
+  }
+  const groups = LOC==='Alle'
+    ? STANDORTE.map(loc => [loc, items.filter(it=>it.standort===loc)])
+        .filter(([,arr])=>arr.length)
+    : [[LOC, items]];
+
+  list.innerHTML = groups.map(([loc, arr]) =>
+    (groups.length>1 || LOC==='Alle'
+      ? '<div class="group-title">'+esc(loc)+'</div>' : '') +
+    '<div class="card-list">' + arr.map(rowHTML).join('') + '</div>'
+  ).join('');
+}
+
+function rowHTML(it){
+  const st = status(it);
+  const badge = st==='out' ? '<span class="badge out">Ausverkauft</span>'
+              : st==='low' ? '<span class="badge low">Fast leer</span>' : '';
+  const sub = [it.marke, it.kategorie].filter(Boolean).map(esc).join(' · ');
+  return '<div class="item" data-id="'+esc(it.id)+'">'+
+    '<div class="item-main" onclick="openSheet(\''+esc(it.id)+'\')">'+
+      '<div class="item-name">'+esc(it.name)+badge+'</div>'+
+      (sub ? '<div class="item-sub">'+sub+'</div>' : '')+
+      (it.notiz ? '<div class="item-note">'+esc(it.notiz)+'</div>' : '')+
+    '</div>'+
+    '<div class="stepper">'+
+      '<button onclick="step(\''+esc(it.id)+'\',-1)" '+(+it.bestand<=0?'disabled':'')+
+        ' aria-label="Bestand verringern">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
+        'stroke-width="2.4" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>'+
+      '</button>'+
+      '<span class="count'+(+it.bestand===0?' zero':'')+'">'+(+it.bestand)+'</span>'+
+      '<button onclick="step(\''+esc(it.id)+'\',1)" aria-label="Bestand erhöhen">'+
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" '+
+        'stroke-width="2.4" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/>'+
+        '<line x1="5" y1="12" x2="19" y2="12"/></svg>'+
+      '</button>'+
+    '</div>'+
+  '</div>';
+}
+
+/* ---------------- Stepper (optimistic) ---------------- */
+
+async function step(id, delta){
+  const it = ITEMS.find(x=>x.id===id);
+  if(!it) return;
+  const before = +it.bestand;
+  const next = Math.max(0, before + delta);
+  if(next === before) return;
+  it.bestand = next;          // optimistic
+  render();
+  try{
+    await api('PATCH', '/api/inventar/items/'+id, {bestand: next});
+  }catch(e){
+    it.bestand = before;      // revert
+    render();
+    toast(e.message);
+  }
+}
+
+/* ---------------- Sheet ---------------- */
+
+function pickButtons(elId, options, selected, setter){
+  const wrap = $(elId);
+  wrap.innerHTML = '';
+  options.forEach(opt=>{
+    const b = document.createElement('button');
+    b.textContent = opt;
+    b.className = opt===selected ? 'active' : '';
+    b.onclick = ()=>{ setter(opt); pickButtons(elId, options, opt, setter); };
+    wrap.appendChild(b);
+  });
+}
+
+function bump(fieldId, delta){
+  const el = $(fieldId);
+  el.value = Math.max(0, (parseInt(el.value,10)||0) + delta);
+}
+
+function openSheet(id){
+  EDIT_ID = id || null;
+  const it = id ? ITEMS.find(x=>x.id===id) : null;
+  $('sheetTitle').textContent = it ? 'Artikel bearbeiten' : 'Neuer Artikel';
+  $('fName').value = it ? it.name : '';
+  $('fMarke').value = it ? (it.marke||'') : '';
+  $('fBestand').value = it ? +it.bestand : 1;
+  $('fMin').value = it ? +it.min_bestand : 1;
+  $('fNotiz').value = it ? (it.notiz||'') : '';
+  sheetKat = it ? it.kategorie : (KAT!=='Alle' ? KAT : null);
+  sheetLoc = it ? it.standort : (LOC!=='Alle' ? LOC : null);
+  pickButtons('fKat', KATEGORIEN, sheetKat, v=>sheetKat=v);
+  pickButtons('fLoc', STANDORTE, sheetLoc, v=>sheetLoc=v);
+  const del = $('sheetDelete');
+  del.style.display = it ? 'block' : 'none';
+  del.classList.remove('armed');
+  del.textContent = 'Artikel löschen';
+  $('sheetMsg').textContent = '';
+  $('sheetOverlay').classList.add('open');
+  if(!it) setTimeout(()=>$('fName').focus(), 250);
+}
+
+function closeSheet(){ $('sheetOverlay').classList.remove('open'); }
+
+async function saveItem(){
+  const body = {
+    name: $('fName').value.trim(),
+    marke: $('fMarke').value.trim(),
+    kategorie: sheetKat,
+    standort: sheetLoc,
+    bestand: parseInt($('fBestand').value,10) || 0,
+    min_bestand: parseInt($('fMin').value,10) || 0,
+    notiz: $('fNotiz').value.trim(),
+  };
+  if(!body.name){ $('sheetMsg').textContent = 'Bitte Namen eingeben'; return; }
+  if(!body.kategorie){ $('sheetMsg').textContent = 'Bitte Kategorie wählen'; return; }
+  if(!body.standort){ $('sheetMsg').textContent = 'Bitte Standort wählen'; return; }
+  const btn = $('sheetSave');
+  btn.disabled = true;
+  try{
+    if(EDIT_ID){
+      const res = await api('PATCH', '/api/inventar/items/'+EDIT_ID, body);
+      const i = ITEMS.findIndex(x=>x.id===EDIT_ID);
+      if(i>=0) ITEMS[i] = res.item;
+    }else{
+      const res = await api('POST', '/api/inventar/items', body);
+      ITEMS.push(res.item);
+    }
+    closeSheet(); render();
+  }catch(e){ $('sheetMsg').textContent = e.message; }
+  btn.disabled = false;
+}
+
+async function deleteItem(){
+  const del = $('sheetDelete');
+  if(!del.classList.contains('armed')){
+    del.classList.add('armed');
+    del.textContent = 'Wirklich löschen?';
+    setTimeout(()=>{ del.classList.remove('armed');
+      del.textContent = 'Artikel löschen'; }, 4000);
+    return;
+  }
+  try{
+    await api('DELETE', '/api/inventar/items/'+EDIT_ID);
+    ITEMS = ITEMS.filter(x=>x.id!==EDIT_ID);
+    closeSheet(); render();
+    toast('Artikel gelöscht');
+  }catch(e){ $('sheetMsg').textContent = e.message; }
+}
+
+/* ---------------- Navbar blur on scroll ---------------- */
+
+window.addEventListener('scroll', ()=>{
+  $('navbar').classList.toggle('scrolled', window.scrollY > 34);
+}, {passive:true});
+
+/* ---------------- Init ---------------- */
+
+if(TOKEN){ enterApp(); }
+else { $('login').style.display = 'flex'; }
+</script>
+</body>
+</html>

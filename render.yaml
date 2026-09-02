@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: tonja-inventar-tool
+    runtime: python
+    buildCommand: echo "No build needed"
+    startCommand: python3 server.py
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_KEY
+        sync: false
+      - key: INVENTAR_CODE
+        sync: false
